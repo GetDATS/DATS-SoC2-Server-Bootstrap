@@ -13,4 +13,4 @@ This bootstrap script:
 ## Usage
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/GetDATS/DATS-SoC2-Server-Config/main/bootstrap.sh | sudo bash
+curl -sSL https://raw.githubusercontent.com/GetDATS/DATS-SoC2-Server-Bootstrap/main/bootstrap.sh | sudo bash
