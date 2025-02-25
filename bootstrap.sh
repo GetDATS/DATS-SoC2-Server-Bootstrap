@@ -22,7 +22,7 @@ show_help() {
     echo ""
     echo "You will need:"
     echo "  - A GitHub deploy key (SSH private key)"
-    echo "  - Your private GitHub repository URL"
+    echo "  - Your private GitHub repository URL (in SSH format)"
     echo ""
     echo "Usage: $0 [--help]"
     echo ""
@@ -49,11 +49,17 @@ log_message() {
 
 log_message "Starting SOC2 server bootstrap process"
 
-# Collect system information for logging
+# Collect system and user information for logging
 log_message "System information:"
 log_message "$(lsb_release -a 2>/dev/null || cat /etc/os-release)"
 log_message "Kernel: $(uname -r)"
 log_message "Hostname: $(hostname)"
+log_message "Script executed by user: $(whoami)"
+if [ -n "$SUDO_USER" ]; then
+    log_message "Real user behind sudo: $SUDO_USER"
+else
+    log_message "Script appears to be run directly as root (no sudo detected)"
+fi
 
 # Check if running as root
 if [ "$(id -u)" -ne 0 ]; then
@@ -137,7 +143,7 @@ mkdir -p $SOC2_DIR
 # Prompt for GitHub repository URL
 echo ""
 echo "Please enter your GitHub repository URL (in SSH format):"
-echo "Example: git@github.com:your-username/soc2-server-config.git"
+echo "Example: git@github.com:GetDATS/DATS-SoC2-Server-Config.git"
 read REPO_URL
 
 # Clone the repository
@@ -151,84 +157,6 @@ if git clone $REPO_URL $SOC2_DIR; then
     find $SOC2_DIR -name "*.sh" -exec chmod +x {} \;
     log_message "Made all scripts executable"
     
-    # Check if repository needs structure setup
-    if [ ! -d "$SOC2_DIR/install_scripts" ]; then
-        echo ""
-        echo "The repository appears to be empty or missing the standard structure."
-        echo "Would you like to set up the basic SOC2 directory structure? (y/n)"
-        read SETUP_STRUCTURE
-        
-        if [[ "$SETUP_STRUCTURE" == "y" || "$SETUP_STRUCTURE" == "Y" ]]; then
-            log_message "Setting up basic repository structure"
-            
-            # Create directory structure
-            mkdir -p $SOC2_DIR/bootstrap $SOC2_DIR/install_scripts $SOC2_DIR/config_files/apache \
-                $SOC2_DIR/config_files/php $SOC2_DIR/config_files/mariadb $SOC2_DIR/config_files/ssh \
-                $SOC2_DIR/config_files/fail2ban $SOC2_DIR/audit_tools $SOC2_DIR/documentation
-            
-            # Create README
-            cat > $SOC2_DIR/README.md << 'EOF'
-# SOC2 Server Configuration
-
-This repository contains scripts and configuration files for setting up SOC2-compliant 
-LAMP servers on Ubuntu 24.04 LTS.
-
-## Directory Structure
-
-- `bootstrap/`: Initial bootstrap scripts
-- `install_scripts/`: Server setup and hardening scripts
-- `config_files/`: Configuration templates for all services
-- `audit_tools/`: Security audit and compliance tools
-- `documentation/`: SOC2 compliance documentation
-
-## Usage
-
-1. Start with the bootstrap script to set up Git and clone this repository
-2. Run installation scripts in numerical order
-3. Use audit tools to verify compliance
-
-## Security Controls
-
-This configuration implements controls for SOC2 Security and Availability criteria.
-EOF
-            
-            # Create initial change log
-            cat > $SOC2_DIR/documentation/change_log.md << EOF
-# Change Log
-
-All notable changes to this server configuration will be documented in this file.
-
-## Initial Setup - $(date +"%Y-%m-%d")
-
-- Repository initialized via bootstrap script
-- Basic directory structure created
-EOF
-            
-            # Copy this bootstrap script to the repository for future reference
-            cp "$(readlink -f "$0")" $SOC2_DIR/bootstrap/
-            
-            # Change to repository directory
-            cd $SOC2_DIR
-            
-            # Initial commit and push
-            git add .
-            git commit -m "Initial repository structure created by bootstrap script"
-            
-            # Smarter push command that handles both main and master branches
-            log_message "Pushing initial structure to repository"
-            git branch -M main  # Ensure we're on a branch called main
-            git push -u origin main || {
-                log_message "Push to 'main' failed, trying 'master'"
-                git branch -M master
-                git push -u origin master || log_message "WARNING: Failed to push to repository"
-            }
-            
-            log_message "Basic repository structure created and committed"
-        else
-            log_message "User chose not to set up basic structure"
-            echo "Continuing without setting up the directory structure."
-        fi
-    fi
 else
     log_message "ERROR: Failed to clone the repository: $REPO_URL"
     echo "Failed to clone the repository. This could be due to:"
@@ -248,9 +176,7 @@ echo "SOC2 configuration repository is located at: $SOC2_DIR"
 echo ""
 echo "Next steps:"
 echo "1. Navigate to the repository: cd $SOC2_DIR"
-echo "2. If this is a new repository, verify the structure was pushed correctly"
-echo "3. Begin the installation process with: ./install_scripts/01_initial_setup.sh"
-echo "   (You may need to create this script first if starting with a new repository)"
+echo "2. Begin the installation process with: ./install_scripts/01_initial_setup.sh"
 echo ""
 echo "For security, you may want to delete the SSH deploy key after setup is complete:"
 echo "rm ~/.ssh/github_deploy_key"
