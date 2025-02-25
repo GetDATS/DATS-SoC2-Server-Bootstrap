@@ -12,5 +12,11 @@ This bootstrap script:
 
 ## Usage
 
-```bash
-curl -sSL https://raw.githubusercontent.com/GetDATS/DATS-SoC2-Server-Bootstrap/main/bootstrap.sh | sudo bash
+# Step 1: Download the script
+curl -sSL https://raw.githubusercontent.com/GetDATS/DATS-SoC2-Server-Bootstrap/main/bootstrap.sh -o bootstrap.sh
+
+# Step 2: Make it executable
+chmod +x bootstrap.sh
+
+# Step 3: Execute it
+sudo ./bootstrap.sh
