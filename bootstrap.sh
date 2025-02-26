@@ -156,6 +156,10 @@ if git clone $REPO_URL $SOC2_DIR; then
     # Make all scripts executable
     find $SOC2_DIR -name "*.sh" -exec chmod +x {} \;
     log_message "Made all scripts executable"
+
+    # Make all tools scripts executable
+    find $SOC2_DIR/tools -name "*.sh" -exec chmod +x {} \;
+    log_message "Made all tools scripts executable"
     
 else
     log_message "ERROR: Failed to clone the repository: $REPO_URL"
