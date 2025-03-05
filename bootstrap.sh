@@ -73,6 +73,11 @@ log_message "Updating package lists"
 echo "Updating system packages. This may take a while..."
 apt-get update
 
+# Update package lists
+log_message "Upgrading package required updates"
+echo "Upgrading system packages. This may take a while..."
+apt-get upgrade -y
+
 # Install essential packages
 log_message "Installing essential packages"
 apt-get install -y git curl wget apt-transport-https ca-certificates gnupg openssh-client
@@ -154,12 +159,12 @@ if git clone $REPO_URL $SOC2_DIR; then
     log_message "Repository cloned successfully"
     
     # Make all scripts executable
-    find $SOC2_DIR -name "*.sh" -exec chmod +x {} \;
-    log_message "Made all scripts executable"
+    find $SOC2_DIR/installers -name "*.sh" -exec chmod +x {} \;
+    log_message "Made all installer scripts executable"
 
     # Make all tools scripts executable
-    find $SOC2_DIR/tools -name "*.sh" -exec chmod +x {} \;
-    log_message "Made all tools scripts executable"
+    find $SOC2_DIR/base/tools/backups -name "*.sh" -exec chmod +x {} \;
+    log_message "Made all backup tools scripts executable"
     
 else
     log_message "ERROR: Failed to clone the repository: $REPO_URL"
