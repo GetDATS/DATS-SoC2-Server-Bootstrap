@@ -2,7 +2,7 @@
 #
 # SOC2 Compliance: Secure Bootstrap Script
 # Purpose: Initial setup to install Git and securely clone the private configuration repository
-# Last updated: 2025-02-25
+# Last updated: 2025-03-05
 #
 # This script:
 # 1. Updates the system
@@ -22,7 +22,6 @@ show_help() {
     echo ""
     echo "You will need:"
     echo "  - A GitHub deploy key (SSH private key)"
-    echo "  - Your private GitHub repository URL (in SSH format)"
     echo ""
     echo "Usage: $0 [--help]"
     echo ""
@@ -145,11 +144,9 @@ SOC2_DIR="/opt/soc2-server-config"
 log_message "Creating base directory: $SOC2_DIR"
 mkdir -p $SOC2_DIR
 
-# Prompt for GitHub repository URL
-echo ""
-echo "Please enter your GitHub repository URL (in SSH format):"
-echo "Example: git@github.com:GetDATS/DATS-SoC2-Server-Config.git"
-read REPO_URL
+# Use fixed repository URL instead of prompting
+REPO_URL="git@github.com:GetDATS/DATS-SoC2-Server-Config.git"
+log_message "Using repository: $REPO_URL"
 
 # Clone the repository
 log_message "Attempting to clone repository: $REPO_URL"
@@ -170,22 +167,19 @@ else
     log_message "ERROR: Failed to clone the repository: $REPO_URL"
     echo "Failed to clone the repository. This could be due to:"
     echo "  - The deploy key may not have been added to the GitHub repository"
-    echo "  - The repository URL may be incorrect"
     echo "  - The SSH configuration may not be correct"
     echo ""
     echo "Check the SSH connection by running: ssh -T git@github.com"
     echo "If that fails, verify your key is working correctly."
     exit 1
 fi
-
 log_message "Bootstrap completed successfully"
 echo ""
 echo "SOC2 server bootstrap complete!"
 echo "SOC2 configuration repository is located at: $SOC2_DIR"
 echo ""
-echo "Next steps:"
-echo "1. Navigate to the repository: cd $SOC2_DIR"
-echo "2. Begin the installation process with: ./installers/00_prepare_ssh.sh"
+echo "Next step: Prepare SSH"
+echo "  sudo bash $SOC2_DIR/installers/01_initial_setup.sh"
 echo ""
 echo "For security, you may want to delete the SSH deploy key after setup is complete:"
 echo "rm ~/.ssh/github_deploy_key"
