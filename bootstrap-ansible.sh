@@ -176,27 +176,6 @@ if git clone $REPO_URL $ANSIBLE_DIR; then
     find $ANSIBLE_DIR -type f -name "*.yml" -exec chmod 640 {} \;
     log_message "Set proper permissions on Ansible playbooks"
 
-    # Create ansible.cfg if it doesn't exist
-    if [ ! -f "$ANSIBLE_DIR/ansible.cfg" ]; then
-        log_message "Creating basic ansible.cfg configuration"
-        cat > "$ANSIBLE_DIR/ansible.cfg" << 'EOF'
-[defaults]
-inventory = inventory/hosts
-host_key_checking = False
-retry_files_enabled = False
-roles_path = roles
-log_path = /var/log/ansible.log
-callback_whitelist = profile_tasks, timer
-
-[privilege_escalation]
-become = True
-become_method = sudo
-become_user = root
-become_ask_pass = False
-EOF
-        chmod 640 "$ANSIBLE_DIR/ansible.cfg"
-    fi
-
     # Make sure the ansible.log file exists and has proper permissions
     touch /var/log/ansible.log
     chmod 640 /var/log/ansible.log
