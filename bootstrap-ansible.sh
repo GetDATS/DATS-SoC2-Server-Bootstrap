@@ -92,7 +92,7 @@ apt-get install -y ansible
 
 # Install Ansible requirements
 log_message "Installing Ansible requirements"
-pip3 install ansible-lint pymysql jmespath
+apt-get install -y python3-jmespath python3-pymysql ansible-lint
 
 # Verify installations
 log_message "Verifying installations"
